@@ -5,9 +5,24 @@ provider "aws" {
 resource "aws_vpc" "vpc-1" {
     cidr_block = "${var.var_vpc-1}"
     enable_dns_hostnames = true
+    enable_dns_support = true
     tags = {
         Name = "DEDO - VPC"
     }
+}
+
+resource "aws_route" "r" {
+  route_table_id = "${aws_vpc.vpc-1.main_route_table_id}"
+  destination_cidr_block    = "0.0.0.0/0"
+  gateway_id = "${aws_internet_gateway.gw.id}"
+}
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = "${aws_vpc.vpc-1.id}"
+
+  tags = {
+    Name = "main"
+  }
 }
 
 resource "aws_subnet" "subnet-1" {
@@ -32,7 +47,9 @@ resource "aws_instance" "i-1" {
     instance_type = "t2.micro"
     ami = "ami-068670db424b01e9a"
     subnet_id = "${aws_subnet.subnet-1.id}"
-    #vpc_security_group_ids = ["${aws_security_group.allow_ssh.id}"]
+    vpc_security_group_ids = ["${aws_security_group.allow_ssh.id}"]
+    associate_public_ip_address = true
+    key_name = "${var.dev-keyname}"
     tags = {
         Name = "Load Runner"
     }
@@ -45,8 +62,8 @@ resource "aws_db_instance" "postgresq" {
   engine_version       = "11.1"
   instance_class       = "db.t2.micro"
   name                 = "db1"
-  username             = ""
-  password             = ""
+  username             = "${var.DBUser}"
+  password             = "${var.DBPassword}"
   parameter_group_name = "default.postgres11"
   vpc_security_group_ids = ["${aws_security_group.allow_pgsql.id}"]
   db_subnet_group_name = "${aws_db_subnet_group.db_subnet_group.name}"
@@ -78,6 +95,13 @@ resource "aws_security_group" "allow_ssh" {
     cidr_blocks = ["${var.MyIP}"] # add your IP address here
   }
 
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
     Name = "allow_all"
   }
@@ -95,7 +119,14 @@ resource "aws_security_group" "allow_pgsql" {
     protocol    = "tcp"
     # Please restrict your ingress to only necessary IPs and ports.
     # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
-    cidr_blocks = ["${var.MyIP}"] # add your IP address here
+    cidr_blocks = ["${var.MyIP}", "${var.var_subnet-1}", "${var.var_subnet-1-b}"] # add your IP address here
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
@@ -103,6 +134,22 @@ resource "aws_security_group" "allow_pgsql" {
   }
 }
 
+resource "aws_security_group" "allow_all" {
+  name        = "allow_all"
+  description = "Allow all traffic (outbound)"
+  vpc_id      = "${aws_vpc.vpc-1.id}"
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "allow_all"
+  }
+}
 
 resource "aws_kms_key" "kms_key" {
   description             = "This key is used to encrypt bucket objects"
@@ -121,3 +168,89 @@ resource "aws_s3_bucket" "bulkdatax" {
     }
   }
 }
+
+resource "aws_db_instance_role_association" "s3import" {
+  db_instance_identifier = "${aws_db_instance.postgresq.id}"
+  feature_name           = "S3_INTEGRATION"
+  role_arn               = "${var.example.id}"
+}
+
+/*
+resource "aws_iam_role" "test_role" {
+  name = "test_role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+
+  tags = {
+    tag-key = "tag-value"
+  }
+}
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "s3integration",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::bulkdata1",
+                "arn:aws:s3:::bulkdata1/*",
+                "arn:aws:s3:::bulkdata2/*",
+                "arn:aws:s3:::bulkdata2",
+                "arn:aws:s3:::bulkdatax",
+                "arn:aws:s3:::bulkdatax/*"
+            ]
+        }
+    ]
+}
+
+*/
+
+/*
+resource "aws_key_pair" "deployer" {
+  key_name   = "deployer-key"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 email@example.com"
+}
+*/
+
+/*resource "aws_iam_policy" "TerraformRDSS3" {
+  name        = "TerraformRDSS3"
+  path        = "/"
+  description = "allows a terraformer to build rds/s3/encryption"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "rds:*",
+                "kms:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}*/

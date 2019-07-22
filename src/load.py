@@ -34,11 +34,18 @@ class S3Loader:
         table_exists = self.check_if_table_exists(os.environ['LOAN_TABLE'])
 
         if table_exists:
-            print ("Table exists - need flag to override to delete")
-            sys.exit(1)
+            print ("Table exists - deleting")
+            #sys.exit(1)
+            self.drop_table(os.environ['LOAN_TABLE'])
 
         self.read_sql_from_file('createtable.sql')
         return
+    
+    def drop_table(self, table_name):
+        cursor = self.conn.cursor()
+        sql_query = "DROP TABLE {}".format(table_name)
+        cursor.execute(sql_query)
+        self.conn.commit()
     
     def create_extension(self):
         """ check if extension exists, otherwise create it """
@@ -59,7 +66,7 @@ class S3Loader:
     def check_if_extension_exists(self, extension):
         """ checks if db extension exists by looking at the postgresql metadata tables """
         cursor = self.conn.cursor()
-        checkQuery = "SELECT * FROM pg_extension WHERE extname = '{}'".format(extension)
+        checkQuery = "SELECT EXISTS(SELECT * FROM pg_extension WHERE extname = '{}')".format(extension)
         cursor.execute(checkQuery)
         self.conn.commit()
         return cursor.fetchone()[0]        
