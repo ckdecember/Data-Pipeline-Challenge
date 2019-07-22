@@ -4,6 +4,9 @@ Amazon S3 - for storing the files (encrypted)
 Amazon RDS - for postgresql 11 (needed for S3 direct copy into RDS)
 Amazon KMS - for encryption for S3
 
+OS Requirements
+Ubuntu 18
+
 Python Packages
 psycopg2
 
