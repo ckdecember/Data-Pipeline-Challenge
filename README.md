@@ -1,4 +1,4 @@
-# BS-DE-DO-CC
+# Data Pipeline Challenge
 
 Amazon S3 - for storing the files (encrypted)
 Amazon RDS - for postgresql 11 (needed for S3 direct copy into RDS)
