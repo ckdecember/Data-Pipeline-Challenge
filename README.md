@@ -33,6 +33,7 @@ These credentials will be needed to build the infrastructure using Terraform.
 ## Create EC2 Instance if needed
 + AWS EC2 t2.micro
 + Ubuntu 18
++ Must exist in the same subnet as the RDS
 
 ## Terraform
 + Download Terraform
@@ -100,16 +101,22 @@ pip3 install psycopg2-binary
 
 + Initialize the environment variables
 
-
 ```
-cd Data-Pipeline-Challenge/src
+cd ~/Data-Pipeline-Challenge/src
+cp env.master .env
+[edit .env]
+source .env
+
 ```
 Run terraform to build the AWS network
 
 ## Getting the Loan Data 
 + Make a Kaggle account
++ Download loan.csv.zip
++ unzip loan.csv.zip
++ Upload to S3
 
-Upload data to S3
+
 
 Run Script
 - Check table / create table
