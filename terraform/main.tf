@@ -155,7 +155,7 @@ resource "aws_security_group" "allow_all" {
 resource "aws_kms_key" "kms_key" {
   description             = "This key is used to encrypt bucket objects"
   deletion_window_in_days = 10
-  /*
+/*
   policy = <<EOF
   {
     "Sid": "Allow use of the key",
@@ -179,6 +179,8 @@ resource "aws_kms_key" "kms_key" {
 
 resource "aws_s3_bucket" "bulkdatax" {
   bucket = "bulkdatax"
+
+  force_destroy = true
 
   server_side_encryption_configuration {
     rule {
