@@ -59,6 +59,14 @@ aws configure
 For the access/secret keys refer to the ACCESS_KEY and SECRET_ACCESS_KEY in the credentials file from the Amazon Web Services section.
 For region, use your current Amazon region and 'json' for the output format.
 
+Manually in awscli
+Create
+rds-s3-role
+
+Create
+KMS
+
+
 + Run Terraform
 ```
 cd ~/Data-Pipeline-Challenge/terraform/
@@ -73,10 +81,14 @@ Fill in the values of variables.tf to match what you desire in your new infrastr
 + DBPassword is the DB master password
 + dev-keyname is the IAM key name in AWS
 + rds-s3-role is a role to be assigned to RDS with access to S3 buckets
-+ S3 bucketname needs to be defined?!?
++ s3_bucket_name is the name of the bucket to store the loans
 + rdss3integrationrole
 
-
+```
+terraform init
+terraform plan
+terraform apply
+```
 
 ## Application
 
