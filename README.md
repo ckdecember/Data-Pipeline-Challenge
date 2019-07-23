@@ -53,7 +53,8 @@ git clone https://github.com/ckdecember/Data-Pipeline-Challenge
 + Install AWSCLI
 ```
 sudo apt update
-sudo apt-get -y install awscli
+@@@sudo apt-get -y install awscli
+pip3 install awscli
 aws configure
 ```
 
@@ -66,6 +67,8 @@ rds-s3-role
 
 Create
 KMS
+
+
 
 
 + Run Terraform
