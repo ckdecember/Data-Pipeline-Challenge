@@ -91,13 +91,10 @@ resource "aws_security_group" "allow_ssh" {
   vpc_id      = "${aws_vpc.vpc-1.id}"
 
   ingress {
-    # TLS (change to whatever ports you need)
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    # Please restrict your ingress to only necessary IPs and ports.
-    # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
-    cidr_blocks = ["${var.MyIP}", "${var.MyIP2}"] # add your IP address here
+    cidr_blocks = ["${var.MyIP}", "${var.MyIP2}"] 
   }
 
   egress {
@@ -118,13 +115,10 @@ resource "aws_security_group" "allow_pgsql" {
   vpc_id      = "${aws_vpc.vpc-1.id}"
 
   ingress {
-    # TLS (change to whatever ports you need)
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    # Please restrict your ingress to only necessary IPs and ports.
-    # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
-    cidr_blocks = ["${var.MyIP}", "${var.var_subnet-1}", "${var.var_subnet-1-b}"] # add your IP address here
+    cidr_blocks = ["${var.MyIP}", "${var.var_subnet-1}", "${var.var_subnet-1-b}"] 
   }
 
   egress {
@@ -156,33 +150,6 @@ resource "aws_security_group" "allow_all" {
   }
 }
 
-resource "aws_kms_key" "kms_key" {
-  description             = "This key is used to encrypt bucket objects"
-  deletion_window_in_days = 10
-/*
-  policy = <<EOF
-  {
-    "Sid": "Allow use of the key",
-    "Effect": "Allow",
-    "Principal": {
-        "AWS": [
-            "arn:aws:iam::823202860115:role/rds-s3-integration-role"
-        ]
-    },
-    "Action": [
-        "kms:Encrypt",
-        "kms:Decrypt",
-        "kms:ReEncrypt*",
-        "kms:GenerateDataKey*",
-        "kms:DescribeKey"
-    ],
-    "Resource": "*"
-    }
-  EOF*/
-}
-
-// hard code the kms master key perhaps?
-
 resource "aws_s3_bucket" "bucket_1" {
   bucket = "${var.s3_bucket_name}"
 
@@ -191,7 +158,7 @@ resource "aws_s3_bucket" "bucket_1" {
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        kms_master_key_id = "${aws_kms_key.kms_key.arn}"
+        kms_master_key_id = "${var.kms_key}"
         sse_algorithm     = "aws:kms"
       }
     }
@@ -204,82 +171,12 @@ resource "aws_db_instance_role_association" "s3import" {
   role_arn               = "${var.rdss3integrationrole}"
 }
 
-/*
-resource "aws_iam_role" "test_role" {
-  name = "test_role"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-
-  tags = {
-    tag-key = "tag-value"
-  }
+resource "aws_iam_policy" "rds-to-s3-policy" {
+  policy = "${file("rds-to-s3-policy.json")}"
 }
 
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "s3integration",
-            "Action": [
-                "s3:GetObject",
-                "s3:ListBucket",
-                "s3:PutObject"
-            ],
-            "Effect": "Allow",
-            "Resource": [
-                "arn:aws:s3:::bulkdata1",
-                "arn:aws:s3:::bulkdata1/*",
-                "arn:aws:s3:::bulkdata2/*",
-                "arn:aws:s3:::bulkdata2",
-                "arn:aws:s3:::bulkdatax",
-                "arn:aws:s3:::bulkdatax/*"
-            ]
-        }
-    ]
+resource "aws_iam_policy" "kms_s3_guard" {
+  policy = "${file("kms-s3-guard.json")}"
 }
 
-*/
-
-/*
-resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 email@example.com"
-}
-*/
-
-/*resource "aws_iam_policy" "TerraformRDSS3" {
-  name        = "TerraformRDSS3"
-  path        = "/"
-  description = "allows a terraformer to build rds/s3/encryption"
-
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "VisualEditor0",
-            "Effect": "Allow",
-            "Action": [
-                "rds:*",
-                "kms:*"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-EOF
-}*/
+// need to tie these policies to roles

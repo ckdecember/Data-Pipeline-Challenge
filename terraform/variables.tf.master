@@ -53,3 +53,8 @@ variable "rdss3integrationrole" {
     description = "rds role"
     default = ""
 }
+
+variable "kms_key" {
+    description = "kms key in ARN format"
+    default = ""
+}
