@@ -72,6 +72,10 @@ resource "aws_db_instance" "postgresq" {
   publicly_accessible = true
 }
 
+output "rds_endpoint" {
+  value = "${aws_db_instance.postgresq.endpoint}"
+}
+
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "main"
   subnet_ids = ["${aws_subnet.subnet-1.id}", "${aws_subnet.subnet-1-b.id}"]
