@@ -69,6 +69,7 @@ resource "aws_db_instance" "postgresq" {
   db_subnet_group_name = "${aws_db_subnet_group.db_subnet_group.name}"
   identifier           = "dbx"
   skip_final_snapshot  = true
+  publicly_accessible = true
 }
 
 resource "aws_db_subnet_group" "db_subnet_group" {
@@ -92,7 +93,7 @@ resource "aws_security_group" "allow_ssh" {
     protocol    = "tcp"
     # Please restrict your ingress to only necessary IPs and ports.
     # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
-    cidr_blocks = ["${var.MyIP}"] # add your IP address here
+    cidr_blocks = ["${var.MyIP}", "${var.MyIP2}"] # add your IP address here
   }
 
   egress {
@@ -154,6 +155,26 @@ resource "aws_security_group" "allow_all" {
 resource "aws_kms_key" "kms_key" {
   description             = "This key is used to encrypt bucket objects"
   deletion_window_in_days = 10
+  /*
+  policy = <<EOF
+  {
+    "Sid": "Allow use of the key",
+    "Effect": "Allow",
+    "Principal": {
+        "AWS": [
+            "arn:aws:iam::823202860115:role/rds-s3-integration-role"
+        ]
+    },
+    "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+    ],
+    "Resource": "*"
+    }
+  EOF*/
 }
 
 resource "aws_s3_bucket" "bulkdatax" {
@@ -171,8 +192,8 @@ resource "aws_s3_bucket" "bulkdatax" {
 
 resource "aws_db_instance_role_association" "s3import" {
   db_instance_identifier = "${aws_db_instance.postgresq.id}"
-  feature_name           = "S3_INTEGRATION"
-  role_arn               = "${var.example.id}"
+  feature_name           = "s3Import"
+  role_arn               = "${var.rdss3integrationrole}"
 }
 
 /*
