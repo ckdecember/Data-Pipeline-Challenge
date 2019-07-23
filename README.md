@@ -59,6 +59,14 @@ aws configure
 For the access/secret keys refer to the ACCESS_KEY and SECRET_ACCESS_KEY in the credentials file from the Amazon Web Services section.
 For region, use your current Amazon region and 'json' for the output format.
 
+Manually in awscli
+Create
+rds-s3-role
+
+Create
+KMS
+
+
 + Run Terraform
 ```
 cd ~/Data-Pipeline-Challenge/terraform/
