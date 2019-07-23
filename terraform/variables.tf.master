@@ -1,0 +1,49 @@
+variable "var_vpc-1" {
+    description = "VPC"
+    default = ""
+}
+
+variable "var_subnet-1" {
+    description = "Subnet"
+    default = ""
+}
+
+variable "var_subnet-1-b" {
+    description = "Subnet 2"
+    default = ""
+}
+
+variable "MyIP" {
+    description = "My IP"
+    default = ""
+}
+
+variable "MyIP2" {
+    description = "My IP"
+    default = ""
+}
+
+variable "DBUser" {
+    description = "PG User"
+    default = ""
+}
+
+variable "DBPassword" {
+    description = "DB Password"
+    default = ""
+}
+
+variable "dev-keyname" {
+    description = "iam key name"
+    default = ""
+}
+
+variable "rds-s3-role" {
+    description = "rds-s3 permissions role"
+    default = ""
+}
+
+variable "rdss3integrationrole" {
+    description = "rds role"
+    default = ""
+}
