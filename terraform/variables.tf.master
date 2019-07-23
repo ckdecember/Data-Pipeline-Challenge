@@ -43,6 +43,12 @@ variable "rds-s3-role" {
     default = ""
 }
 
+variable "s3_bucket_name" {
+    description = "s3 bucket name"
+    default = ""
+}
+
+
 variable "rdss3integrationrole" {
     description = "rds role"
     default = ""
