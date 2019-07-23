@@ -116,8 +116,6 @@ Run terraform to build the AWS network
 + unzip loan.csv.zip
 + Upload to S3
 
-
-
-Run Script
+## Run Script
 - Check table / create table
 - Load from S3 to RDS directly
