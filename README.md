@@ -53,8 +53,7 @@ git clone https://github.com/ckdecember/Data-Pipeline-Challenge
 + Install AWSCLI
 ```
 sudo apt update
-@@@sudo apt-get -y install awscli
-pip3 install awscli
+sudo pip3 install awscli
 aws configure
 ```
 
@@ -99,7 +98,7 @@ terraform apply
 + Install psycopg2
 ```
 sudo apt-get -y install python3-pip
-pip3 install psycopg2-binary
+sudo pip3 install psycopg2-binary
 ```
 
 + Initialize the environment variables
