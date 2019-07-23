@@ -57,8 +57,41 @@ aws configure
 ```
 
 For the access/secret keys refer to the ACCESS_KEY and SECRET_ACCESS_KEY in the credentials file from the Amazon Web Services section.
+For region, use your current Amazon region and 'json' for the output format.
+
++ Run Terraform
+```
+cd ~/Data-Pipeline-Challenge/terraform/
+cp variables.tf.master variables.tf
+```
+
+Fill in the values of variables.tf to match what you desire in your new infrastructure
++ VPC has to be a superset of Subnet 1 and Subnet 2.  Both are needed for RDS. e.g.  10.0.0.0/16 VPC, 10.0.0.0/24 Sub1, 10.0.1.0/24 Sub2
++ MyIP is your local IP so you can test
++ MyIP2 is another local IP
++ DBUser is the DB master username 
++ DBPassword is the DB master password
++ dev-keyname is the IAM key name in AWS
++ rds-s3-role is a role to be assigned to RDS with access to S3 buckets
++ S3 bucketname needs to be defined?!?
++ rdss3integrationrole
 
 
+
+## Application
+
++ Install psycopg2
+```
+sudo apt-get -y install python3-pip
+pip3 install psycopg2-binary
+```
+
++ Initialize the environment variables
+
+
+```
+cd Data-Pipeline-Challenge/src
+```
 Run terraform to build the AWS network
 
 ## Getting the Loan Data 
