@@ -1,8 +1,29 @@
 # Data Pipeline Challenge
 
-Amazon S3 - for storing the files (encrypted)  
-Amazon RDS - for postgresql 11 (needed for S3 direct copy into RDS)  
-Amazon KMS - for encryption for S3  
+## Problem 
+Located here https://www.kaggle.com/wendykan/lending-club-loan-data is loan origination data that we would like to process.
+
+We need an infrastructure built using "infrastructure as code" that has 
++ cloud storage
++ cloud data pipeline / etl environment
++ cloud database engine
+
+Furthermore, we need a production data pipeline that leverages this infrastructure with these key requirements
++ allows data scientists to explore and model data
++ model training and evaluation
++ handles and processes periodic updates in a robust, efficient way
+
+Assume all work will be shared with engineers, data engineers, data scientists, and software engineers in a collaborative environment.
+
+## Solution
+We will be utilizing Amazon as our cloud provider and leverage their services.  For the "infrastructure as code" component, we will be using Terraform.  As for processing, we will use lambda functions alongside with S3 storage.  Users will upload the loan files to S3 and Lambda will process them immediately after they are successfully uploaded.
+@@@
+
+
+
+
++ Amazon S3 - for storing the loan files  
++ Amazon RDS - Postgresql 11 (needed for S3 direct copy into RDS)  
 
 ### OS Requirements
 Ubuntu 18 AMI on Amazon Web Services
@@ -74,6 +95,18 @@ Fill in the values of variables.tf to match what you desire in your new infrastr
 + DBPassword is the DB master password
 + dev-keyname is the IAM key name in AWS
 
+```
+cd ~/Data-Pipeline-Challenge/src
+sudo apt-get -y install zip
+cp env.master .env
+[edit .env - just fill S3_REGION for now]
+git clone https://github.com/jkehler/awslambda-psycopg2
+cp awslambda-psycopg2/psycopg2-3.6 psycopg2
+sudo pip3 install python-dotenv -t ./
+./create_lambda_zip.sh
+```
+
+## Create initial lambda package
 
 ```
 terraform init
@@ -97,7 +130,7 @@ cd ~/Data-Pipeline-Challenge/src
 cp env.master .env
 [edit .env]
 source .env
-
+https://github.com/jkehler/awslambda-psycopg2
 ```
 Run terraform to build the AWS network
 

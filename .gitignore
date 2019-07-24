@@ -5,3 +5,7 @@ env
 terraform/variables.tf
 .env
 *.json
+src/dotenv/
+src/load.zip
+src/psycopg2/
+src/python_dotenv-0.10.3.dist-info/
