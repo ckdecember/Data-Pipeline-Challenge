@@ -2,6 +2,7 @@
 Load Postgresql DB from S3 
 """
 
+import datetime
 import json
 import logging
 import os
@@ -71,9 +72,14 @@ class S3Loader:
     def drop_table(self, table_name):
         """ drop table """
         cursor = self.conn.cursor()
-        cursor.execute("DROP TABLE %s", (table_name))
-        #sql_query = "DROP TABLE {}".format(table_name)
-        #cursor.execute(sql_query)
+        cursor.execute("DROP TABLE '%s'", (table_name,) )
+        self.conn.commit()
+        return
+
+    def insert_into_loan_tables(self, table_name):
+        """ insert into metatable to keep track of loan tables """
+        cursor = self.conn.cursor()
+        cursor.execute("""INSERT INTO %s ("table_name", "start_date") VALUES (%s, %s)""", (self.restricted_table, table_name, datetime.datetime.now()))
         self.conn.commit()
         return
     
@@ -96,8 +102,6 @@ class S3Loader:
         """ checks if table exists by looking at the postgresql metadata tables """
         cursor = self.conn.cursor()
         cursor.execute("SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_name=%s)", (table_name,)), 
-        #checkQuery = "SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_name='{}')".format(table_name)
-        #cursor.execute(checkQuery)
         self.conn.commit()
         return cursor.fetchone()[0]
 
@@ -105,8 +109,6 @@ class S3Loader:
         """ checks if db extension exists by looking at the postgresql metadata tables """
         cursor = self.conn.cursor()
         cursor.execute("SELECT EXISTS(SELECT * FROM pg_extension WHERE extname = %s)", (extension,))
-        #checkQuery = "SELECT EXISTS(SELECT * FROM pg_extension WHERE extname = '{}')".format(extension)
-        #cursor.execute(checkQuery)
         self.conn.commit()
         return cursor.fetchone()[0]        
 
@@ -121,13 +123,6 @@ class S3Loader:
 
         table_name = file_name.split(".")[0]
 
-        #sqlquery = """
-        #    SELECT aws_s3.table_import_from_s3(
-        #    '{}', '', '(format csv)',
-        #    '{}', '{}', '{}'
-        #    );
-        #""".format(table_name, bucket_name, file_name, region)
-
         cursor.execute("""SELECT aws_s3.table_import_from_s3(\
             %s, '', '(format csv)', 
             %s, %s, %s
@@ -135,8 +130,6 @@ class S3Loader:
         """, (table_name, bucket_name, file_name, region))
         
         print ("Loading data ...")
-        #logger.debug(sqlquery)
-        #cursor.execute(sqlquery)
         self.conn.commit()
         return
     
@@ -183,12 +176,14 @@ def lambda_handler(event, context):
     region = event['Records'][0]['awsRegion']
     bucket_name = event['Records'][0]['s3']['bucket']['name']
     file_name = event['Records'][0]['s3']['object']['key']
+    table_name = file_name.split('.')[0]
 
     s = S3Loader()
     s.create_table()
     s.create_extension()
     s.create_meta_loan_table()
     s.s3_load(bucket_name, file_name, region)
+    s.insert_into_loan_tables(table_name)
     return
 
 if __name__ == "__main__":
