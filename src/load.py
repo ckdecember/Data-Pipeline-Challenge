@@ -2,6 +2,7 @@
 Load Postgresql DB from S3 
 """
 
+import json
 import logging
 import os
 import sys
@@ -80,7 +81,7 @@ class S3Loader:
         self.read_sql_from_file('aws_pg_extension.sql')
         return
 
-    def s3_load(self):
+    def s3_load(self, bucket_name, file_name, region):
         """ import data from S3 - requires extensions """
         cursor = self.conn.cursor()
 
@@ -135,8 +136,20 @@ def main():
     return
 
 def lambda_handler(event, context):
-    logger.debug(event.[0].s3)
-    #main()
+
+    print ("S3 Loader {}".format(__version__))
+
+    # try and check
+    # ensure filename, ensure uncompressed (or compressed)
+
+    region = event['Records'][0]['awsRegion']
+    bucket_name = event['Records'][0]['s3']['bucket']['name']
+    file_name = event['Records'][0]['s3']['object']['key']
+
+    s = S3Loader()
+    s.create_table()
+    s.create_extension()
+    s.s3_load(bucket_name, file_name, region)
 
 if __name__ == "__main__":
     main()
