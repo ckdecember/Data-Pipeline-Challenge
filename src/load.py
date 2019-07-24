@@ -92,10 +92,12 @@ class S3Loader:
             '{}', '', '(format csv)',
             '{}', '{}', '{}'
             );
-        """.format(table_name, os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
-            os.environ["S3_REGION"])
+        """.format(table_name, bucket_name, file_name, region)
+        #.format(table_name, os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
+            #os.environ["S3_REGION"])
         
         print ("Loading data ...")
+        logger.debug(sqlquery)
         cursor.execute(sqlquery)
         self.conn.commit()
         return
