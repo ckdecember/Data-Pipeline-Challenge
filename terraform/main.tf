@@ -75,30 +75,6 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
-resource "aws_security_group" "allow_ssh" {
-  name        = "allow_ssh"
-  description = "Allow SSH inbound traffic"
-  vpc_id      = "${aws_vpc.vpc-1.id}"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["${var.MyIP}"] 
-  }
-
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "allow_all"
-  }
-}
-
 resource "aws_security_group" "allow_pgsql" {
   name        = "allow_pgsql"
   description = "Allow Postgresql inbound traffic"
@@ -122,6 +98,7 @@ resource "aws_security_group" "allow_pgsql" {
     Name = "allow_pgsql"
   }
 }
+
 resource "aws_s3_bucket" "bucket_1" {
 
   bucket = "${var.s3_bucket_name}"
@@ -130,3 +107,32 @@ resource "aws_s3_bucket" "bucket_1" {
 
 }
 
+resource "aws_iam_role" "iam_for_lambda" {
+  name = "iam_for_lambda"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_lambda_function" "LoadTest2" {
+  filename      = "../src/load.zip"
+  function_name = "LoadTest2"
+  role          = "${aws_iam_role.iam_for_lambda.arn}"
+  handler       = "load.lambda_handler"
+
+  runtime = "python3.6"
+  timeout = 600
+}
