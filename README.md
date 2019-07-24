@@ -26,7 +26,7 @@ For Part 2, we will rely on temporary tables that are bulk loaded and use a cont
 + Amazon Lambda - to trigger a function after every S3 Upload
 
 ### OS Requirements
-Ubuntu 18 AMI on Amazon Web Services
++ Ubuntu 18 AMI on Amazon Web Services
 
 ### Additional Software Requirements
 + Terraform 0.12+
@@ -34,8 +34,8 @@ Ubuntu 18 AMI on Amazon Web Services
 + zip
 
 ### Python Packages
-psycopg2
-python-dotenv
++ psycopg2
++ python-dotenv
 
 # Instructions
 This walkthrough should cover everything you need to build the infrastructure.  While the requirements are listed, the instructions provided will help you install everything required.
@@ -81,7 +81,7 @@ If you have any problems downloading this version, try this URL to find a newer 
 git clone https://github.com/ckdecember/Data-Pipeline-Challenge
 ```
 
-+ Install AWSCLI
+## Install AWSCLI
 ```
 sudo apt-get update
 sudo apt-get -y install python3-pip
