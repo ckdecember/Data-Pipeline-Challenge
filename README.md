@@ -12,6 +12,7 @@ Ubuntu 18 AMI on Amazon Web Services
 
 ### Python Packages
 psycopg2
+python-dotenv
 
 ## Amazon Web Services (AWS)
 + Create an AWS account
@@ -63,17 +64,16 @@ For region, use your current Amazon region and 'json' for the output format.
 
 + Run Terraform
 ```
+cd Data-Pipeline-Challenge/terraform/
 cp variables.tf.master variables.tf
+[edit variables.tf]
 ```
 
 Fill in the values of variables.tf to match what you desire in your new infrastructure
 + VPC has to be a superset of Subnet 1 and Subnet 2.  Both are needed for RDS. e.g.  10.0.0.0/16 VPC, 10.0.0.0/24 Sub1, 10.0.1.0/24 Sub2
-+ MyIP is your local IP so you can test
-+ MyIP2 is another local IP
 + DBUser is the DB master username 
 + DBPassword is the DB master password
-+ dev-keyname is the IAM key name in AWS
-
++ DBName is the name of the database
 
 ```
 terraform init
@@ -85,21 +85,18 @@ Get some coffee.  This might take some time.
 
 ## Application
 
-+ Install psycopg2
-```
-sudo pip3 install psycopg2-binary
-```
-
-+ Initialize the environment variables
++ Deploy the Lambda Function
 
 ```
 cd ~/Data-Pipeline-Challenge/src
 cp env.master .env
 [edit .env]
-source .env
+git clone https://github.com/jkehler/awslambda-psycopg2
+pip3 install python-dotenv -t ./
+
+update_lambda.sh
 
 ```
-Run terraform to build the AWS network
 
 ## Getting the Loan Data 
 + Make a Kaggle account

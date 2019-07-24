@@ -2,14 +2,18 @@
 Load Postgresql DB from S3 
 """
 
+import json
 import logging
 import os
 import sys
 
+from dotenv import load_dotenv
 import psycopg2
 
 __version__ = "0.02"
 __author__ = "Carroll Kong"
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -77,18 +81,23 @@ class S3Loader:
         self.read_sql_from_file('aws_pg_extension.sql')
         return
 
-    def s3_load(self):
+    def s3_load(self, bucket_name, file_name, region):
         """ import data from S3 - requires extensions """
         cursor = self.conn.cursor()
+
+        table_name = os.environ["S3_FILENAME"].split(".")[0]
+
         sqlquery = """
             SELECT aws_s3.table_import_from_s3(
             '{}', '', '(format csv)',
             '{}', '{}', '{}'
             );
-        """.format(os.environ["LOAN_TABLE"], os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
-            os.environ["S3_REGION"])
-
+        """.format(table_name, bucket_name, file_name, region)
+        #.format(table_name, os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
+            #os.environ["S3_REGION"])
+        
         print ("Loading data ...")
+        logger.debug(sqlquery)
         cursor.execute(sqlquery)
         self.conn.commit()
         return
@@ -110,6 +119,15 @@ class S3Loader:
             logger.info(e)
             sys.exit(1)
         return
+    
+    def insert_select(self, src_table, dst_table):
+        """ skeleton for insert into select """
+        # can get fields from metadata of table.
+        # need dstination and src tables
+        """ INSERT into DSTTABLE ([fields])
+        SELECT [fields] FROM SRCTABLE
+        """
+        pass
 
 def main():
     print ("S3 Loader {}".format(__version__))
@@ -118,6 +136,22 @@ def main():
     s.create_extension()
     s.s3_load()
     return
+
+def lambda_handler(event, context):
+
+    print ("S3 Loader {}".format(__version__))
+
+    # try and check
+    # ensure filename, ensure uncompressed (or compressed)
+
+    region = event['Records'][0]['awsRegion']
+    bucket_name = event['Records'][0]['s3']['bucket']['name']
+    file_name = event['Records'][0]['s3']['object']['key']
+
+    s = S3Loader()
+    s.create_table()
+    s.create_extension()
+    s.s3_load(bucket_name, file_name, region)
 
 if __name__ == "__main__":
     main()

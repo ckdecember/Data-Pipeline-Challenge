@@ -5,3 +5,7 @@ env
 terraform/variables.tf
 .env
 *.json
+psycopg2
+*.zip
+dotenv/
+*dist-info/
