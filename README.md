@@ -52,6 +52,7 @@ git clone https://github.com/ckdecember/Data-Pipeline-Challenge
 
 + Install AWSCLI
 ```
+sudo apt-get update
 sudo apt-get -y install python3-pip
 sudo pip3 install awscli
 aws configure
