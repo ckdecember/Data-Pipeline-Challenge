@@ -53,7 +53,7 @@ git clone https://github.com/ckdecember/Data-Pipeline-Challenge
 + Install AWSCLI
 ```
 sudo apt update
-sudo apt-get -y install awscli
+sudo pip3 install awscli
 aws configure
 ```
 
@@ -66,6 +66,8 @@ rds-s3-role
 
 Create
 KMS
+
+
 
 
 + Run Terraform
@@ -96,7 +98,7 @@ terraform apply
 + Install psycopg2
 ```
 sudo apt-get -y install python3-pip
-pip3 install psycopg2-binary
+sudo pip3 install psycopg2-binary
 ```
 
 + Initialize the environment variables
@@ -116,8 +118,6 @@ Run terraform to build the AWS network
 + unzip loan.csv.zip
 + Upload to S3
 
-
-
-Run Script
+## Run Script
 - Check table / create table
 - Load from S3 to RDS directly
