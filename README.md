@@ -61,24 +61,6 @@ aws configure
 For the access/secret keys refer to the ACCESS_KEY and SECRET_ACCESS_KEY in the credentials file from the Amazon Web Services section.
 For region, use your current Amazon region and 'json' for the output format.
 
-+ Create additional AWS roles and policies
-```
-cd ~/Data-Pipeline-Challenge/terraform/
-./aws-rds-s3-role-create.sh
-./aws-rds-s3-policy-create.sh
-```
-
-Use the output of policy-create's "ARN" in the next script
-```
-./aws-rds-s3-role-attach.sh [POLICY-ARN]
-```
-
-Create
-KMS
-
-Create 
-S3 bucket
-
 + Run Terraform
 ```
 cp variables.tf.master variables.tf
@@ -128,3 +110,16 @@ Run terraform to build the AWS network
 ## Run Script
 - Check table / create table
 - Load from S3 to RDS directly
+
+## Future Data
++ load data to a temporary table
++ use insert 
+INSERT into TARGETTABLE ([fields]) SELECT [fields] FROM SRCTABLE
++ trigger off of S3 uploads into a Lambda
+
+## GPG
++ have all members use GPG
++ use GPG to transfer AWS credentials and PGSQL credentials securely
+
+## Automating Kaggle Download
++ with cookies and some credentials, can automate this download

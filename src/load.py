@@ -8,7 +8,7 @@ import sys
 
 import psycopg2
 
-__version__ = "0.01"
+__version__ = "0.02"
 __author__ = "Carroll Kong"
 
 logger = logging.getLogger(__name__)

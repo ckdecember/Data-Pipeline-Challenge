@@ -33,27 +33,7 @@ variable "DBPassword" {
     default = ""
 }
 
-variable "dev-keyname" {
-    description = "iam key name"
-    default = ""
-}
-
-variable "rds-s3-role" {
-    description = "rds-s3 permissions role"
-    default = ""
-}
-
 variable "s3_bucket_name" {
     description = "s3 bucket name"
-    default = ""
-}
-
-variable "rdss3integrationrole" {
-    description = "rds role"
-    default = ""
-}
-
-variable "kms_key" {
-    description = "kms key in ARN format"
     default = ""
 }

@@ -43,22 +43,6 @@ resource "aws_subnet" "subnet-1-b" {
     }
 }
 
-resource "aws_instance" "i-1" {
-    instance_type = "t2.micro"
-    ami = "ami-068670db424b01e9a"
-    subnet_id = "${aws_subnet.subnet-1.id}"
-    vpc_security_group_ids = ["${aws_security_group.allow_ssh.id}"]
-    associate_public_ip_address = true
-    key_name = "${var.dev-keyname}"
-    tags = {
-        Name = "Load Runner"
-    }
-}
-
-output "i-1_ip" {
-  value = "${aws_instance.i-1.public_ip}"
-}
-
 resource "aws_db_instance" "postgresq" {
   allocated_storage    = 20
   storage_type         = "gp2"
@@ -124,7 +108,7 @@ resource "aws_security_group" "allow_pgsql" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["${var.MyIP}", "${var.var_subnet-1}", "${var.var_subnet-1-b}"] 
+    cidr_blocks = ["0.0.0.0/0"] 
   }
 
   egress {
@@ -138,77 +122,11 @@ resource "aws_security_group" "allow_pgsql" {
     Name = "allow_pgsql"
   }
 }
-
-resource "aws_security_group" "allow_all" {
-  name        = "allow_all"
-  description = "Allow all traffic (outbound)"
-  vpc_id      = "${aws_vpc.vpc-1.id}"
-
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "allow_all"
-  }
-}
-
-/*
-resource "aws_kms_key" "kms_s3" {
-  # (resource arguments)
-}
-
-// maybe drop the key here.  make aws s3 bucket on it's own with command line
-// also make the s3import via aws command line
-*/
-
 resource "aws_s3_bucket" "bucket_1" {
+
   bucket = "${var.s3_bucket_name}"
 
   force_destroy = true
 
-/*
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = "${aws_kms_key.kms_s3.id}"
-        sse_algorithm     = "aws:kms"
-      }
-    }
-  }
-*/
 }
 
-
-/*
-resource "aws_db_instance_role_association" "s3import" {
-  db_instance_identifier = "${aws_db_instance.postgresq.id}"
-  feature_name           = "s3Import"
-  role_arn               = "${var.rdss3integrationrole}"
-}
-*/
-
-/*
-resource "aws_iam_policy" "rds-to-s3-policy" {
-  policy = "${file("rds-to-s3-policy.json")}"
-}
-
-resource "aws_iam_role" "rds-s3-role" {
-  name = "rds-s3-integration-role"
-  assume_role_policy = "${file("rds-s3-integration-role.json")}"
-  tags = {
-    tag-key = "tag-value"
-  }
-}
-*/
-
-/*
-resource "aws_iam_policy" "kms-s3-guard" {
-  policy = "${file("kms-s3-guard.json")}"
-}
-*/
-
-// need to tie these policies to roles
