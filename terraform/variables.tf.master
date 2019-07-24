@@ -13,11 +13,6 @@ variable "var_subnet-1-b" {
     default = ""
 }
 
-variable "MyIP" {
-    description = "My IP"
-    default = ""
-}
-
 variable "DBName" {
     description = "PG DBName"
     default = ""

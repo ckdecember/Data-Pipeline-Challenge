@@ -75,30 +75,6 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   }
 }
 
-resource "aws_security_group" "allow_ssh" {
-  name        = "allow_ssh"
-  description = "Allow SSH inbound traffic"
-  vpc_id      = "${aws_vpc.vpc-1.id}"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["${var.MyIP}"] 
-  }
-
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "allow_all"
-  }
-}
-
 resource "aws_security_group" "allow_pgsql" {
   name        = "allow_pgsql"
   description = "Allow Postgresql inbound traffic"
@@ -122,8 +98,6 @@ resource "aws_security_group" "allow_pgsql" {
     Name = "allow_pgsql"
   }
 }
-
-
 
 resource "aws_s3_bucket" "bucket_1" {
 
