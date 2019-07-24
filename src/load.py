@@ -30,27 +30,57 @@ class S3Loader:
     def __init__(self):
         self.conn = psycopg2.connect(host=os.environ['POSTGRES_HOST'], database=os.environ['POSTGRES_DB'], \
             user=os.environ['POSTGRES_USER'], password=os.environ['POSTGRES_PASSWORD'])
+        self.restricted_table = "meta_loan_tables"
         return
 
     def create_table(self):
         """ make initial table """
-
         table_exists = self.check_if_table_exists(os.environ['LOAN_TABLE'])
+
+        if table_exists and (os.environ['LOAN_TABLE'] != self.restricted_table):
+            print ("Table exists - deleting")
+            #sys.exit(1)
+            self.drop_table(os.environ['LOAN_TABLE'])
+            self.remove_from_loan_tables(os.environ['LOAN_TABLE'])
+
+        self.read_sql_from_file('createtable.sql')
+        return
+    
+    def create_meta_loan_table(self):
+        """ make initial meta loan tables """
+        table_exists = self.check_if_table_exists("meta_loan_tables")
+
+        if not table_exists:
+            self.read_sql_from_file('create_meta_loan_tables.sql')
+        return
+
+    def create_master_table(self):
+        """ make initial master table, or rename first table into master one? """
+        """table_exists = self.check_if_table_exists(os.environ['LOAN_TABLE'])
 
         if table_exists:
             print ("Table exists - deleting")
             #sys.exit(1)
             self.drop_table(os.environ['LOAN_TABLE'])
+            self.remove_from_loan_tables(os.environ['LOAN_TABLE'])
 
         self.read_sql_from_file('createtable.sql')
+        return"""
         return
-    
+
     def drop_table(self, table_name):
         """ drop table """
         cursor = self.conn.cursor()
         sql_query = "DROP TABLE {}".format(table_name)
         cursor.execute(sql_query)
         self.conn.commit()
+        return
+    
+    def remove_from_loan_tables(self, table_name):
+        """ remove table from the metatable that lists existing loan tables """
+        cursor = self.conn.cursor()
+        sqlquery = "DELETE FROM "
+        return
     
     def create_extension(self):
         """ check if extension exists, otherwise create it """
@@ -85,7 +115,7 @@ class S3Loader:
         """ import data from S3 - requires extensions """
         cursor = self.conn.cursor()
 
-        table_name = os.environ["S3_FILENAME"].split(".")[0]
+        table_name = file_name.split(".")[0]
 
         sqlquery = """
             SELECT aws_s3.table_import_from_s3(
@@ -130,6 +160,7 @@ def main():
     s = S3Loader()
     s.create_table()
     s.create_extension()
+    s.create_meta_loan_table()
     s.s3_load()
     return
 
@@ -146,7 +177,9 @@ def lambda_handler(event, context):
     s = S3Loader()
     s.create_table()
     s.create_extension()
+    s.create_meta_loan_table()
     s.s3_load(bucket_name, file_name, region)
+    return
 
 if __name__ == "__main__":
     main()
