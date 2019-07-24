@@ -6,10 +6,13 @@ import logging
 import os
 import sys
 
+from dotenv import load_dotenv
 import psycopg2
 
 __version__ = "0.02"
 __author__ = "Carroll Kong"
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -80,13 +83,19 @@ class S3Loader:
     def s3_load(self):
         """ import data from S3 - requires extensions """
         cursor = self.conn.cursor()
+
+        table_name = os.environ["S3_FILENAME"].split(".")[0]
+
         sqlquery = """
             SELECT aws_s3.table_import_from_s3(
             '{}', '', '(format csv)',
             '{}', '{}', '{}'
             );
-        """.format(os.environ["LOAN_TABLE"], os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
+        """.format(table_name, os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
             os.environ["S3_REGION"])
+        
+        #.format(os.environ["LOAN_TABLE"], os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
+           # os.environ["S3_REGION"])
 
         print ("Loading data ...")
         cursor.execute(sqlquery)
@@ -118,6 +127,9 @@ def main():
     s.create_extension()
     s.s3_load()
     return
+
+def lambda_handler(event, context):
+    main()
 
 if __name__ == "__main__":
     main()
