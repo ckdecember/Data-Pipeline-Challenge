@@ -93,8 +93,6 @@ class S3Loader:
             '{}', '{}', '{}'
             );
         """.format(table_name, bucket_name, file_name, region)
-        #.format(table_name, os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
-            #os.environ["S3_REGION"])
         
         print ("Loading data ...")
         logger.debug(sqlquery)
@@ -122,8 +120,6 @@ class S3Loader:
     
     def insert_select(self, src_table, dst_table):
         """ skeleton for insert into select """
-        # can get fields from metadata of table.
-        # need dstination and src tables
         """ INSERT into DSTTABLE ([fields])
         SELECT [fields] FROM SRCTABLE
         """
@@ -141,7 +137,6 @@ def lambda_handler(event, context):
 
     print ("S3 Loader {}".format(__version__))
 
-    # try and check
     # ensure filename, ensure uncompressed (or compressed)
 
     region = event['Records'][0]['awsRegion']
