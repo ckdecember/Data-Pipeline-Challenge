@@ -94,9 +94,6 @@ class S3Loader:
         """.format(table_name, os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
             os.environ["S3_REGION"])
         
-        #.format(os.environ["LOAN_TABLE"], os.environ["S3_BUCKET_NAME"], os.environ["S3_FILENAME"], \
-           # os.environ["S3_REGION"])
-
         print ("Loading data ...")
         cursor.execute(sqlquery)
         self.conn.commit()
@@ -119,6 +116,15 @@ class S3Loader:
             logger.info(e)
             sys.exit(1)
         return
+    
+    def insert_select(self, src_table, dst_table):
+        """ skeleton for insert into select """
+        # can get fields from metadata of table.
+        # need dstination and src tables
+        """ INSERT into DSTTABLE ([fields])
+        SELECT [fields] FROM SRCTABLE
+        """
+        pass
 
 def main():
     print ("S3 Loader {}".format(__version__))
@@ -129,7 +135,8 @@ def main():
     return
 
 def lambda_handler(event, context):
-    main()
+    logger.debug(event.[0].s3)
+    #main()
 
 if __name__ == "__main__":
     main()
