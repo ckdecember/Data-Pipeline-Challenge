@@ -156,25 +156,34 @@ resource "aws_security_group" "allow_all" {
   }
 }
 
+/*
+resource "aws_kms_key" "kms_s3" {
+  # (resource arguments)
+}
+
 // maybe drop the key here.  make aws s3 bucket on it's own with command line
 // also make the s3import via aws command line
+*/
 
-/*
 resource "aws_s3_bucket" "bucket_1" {
   bucket = "${var.s3_bucket_name}"
 
   force_destroy = true
 
+/*
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        kms_master_key_id = "${var.kms_key}"
+        kms_master_key_id = "${aws_kms_key.kms_s3.id}"
         sse_algorithm     = "aws:kms"
       }
     }
   }
+*/
 }
 
+
+/*
 resource "aws_db_instance_role_association" "s3import" {
   db_instance_identifier = "${aws_db_instance.postgresq.id}"
   feature_name           = "s3Import"
