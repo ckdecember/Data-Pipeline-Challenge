@@ -99,6 +99,8 @@ terraform plan
 terraform apply
 ```
 
+Get some coffee.  This might take some time.
+
 ## Application
 
 + Install psycopg2

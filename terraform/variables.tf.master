@@ -18,6 +18,11 @@ variable "MyIP" {
     default = ""
 }
 
+variable "DBName" {
+    description = "PG DBName"
+    default = ""
+}
+
 variable "DBUser" {
     description = "PG User"
     default = ""

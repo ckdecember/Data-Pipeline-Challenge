@@ -68,10 +68,12 @@ resource "aws_db_instance" "postgresq" {
   name                 = "db1"
   username             = "${var.DBUser}"
   password             = "${var.DBPassword}"
+  identifier           = "${var.DBName}"
+
   parameter_group_name = "default.postgres11"
   vpc_security_group_ids = ["${aws_security_group.allow_pgsql.id}"]
   db_subnet_group_name = "${aws_db_subnet_group.db_subnet_group.name}"
-  identifier           = "dbx"
+  
   skip_final_snapshot  = true
   publicly_accessible = true
 }
