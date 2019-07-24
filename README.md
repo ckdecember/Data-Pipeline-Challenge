@@ -17,23 +17,28 @@ Assume all work will be shared with engineers, data engineers, data scientists, 
 
 ## Solution
 We will be utilizing Amazon as our cloud provider and leverage their services.  For the "infrastructure as code" component, we will be using Terraform.  As for processing, we will use lambda functions alongside with S3 storage.  Users will upload the loan files to S3 and Lambda will process them immediately after they are successfully uploaded.
-@@@
 
+For Part 2, we will rely on temporary tables that are bulk loaded and use a controller script to use insert select statements for speedy insertions.  Data will be kept as is as this is the first phase.
 
-
-
+## Amazon Technologies Used
 + Amazon S3 - for storing the loan files  
 + Amazon RDS - Postgresql 11 (needed for S3 direct copy into RDS)  
++ Amazon Lambda - to trigger a function after every S3 Upload
 
 ### OS Requirements
 Ubuntu 18 AMI on Amazon Web Services
 
 ### Additional Software Requirements
 + Terraform 0.12+
++ unzip
++ zip
 
 ### Python Packages
 psycopg2
 python-dotenv
+
+# Instructions
+This walkthrough should cover everything you need to build the infrastructure.  While the requirements are listed, the instructions provided will help you install everything required.
 
 ## Amazon Web Services (AWS)
 + Create an AWS account
@@ -50,9 +55,11 @@ python-dotenv
   - Next:Review
 + Download the .csv file in a safe place
 
-These credentials will be needed to build the infrastructure using Terraform.
+These credentials will be needed to build the infrastructure using Terraform.  Keep note of this!
 
-## Create EC2 Instance if needed
+## Create EC2 Instance 
+This server will execute Terraform to build out the infrastructure.  Build an EC2 Instance with these requirements
+
 + AWS EC2 t2.micro
 + Ubuntu 18
 + Must exist in the same subnet as the RDS
@@ -67,6 +74,8 @@ sudo install terraform /usr/local/bin/terraform
 rm terraform*
 ```
 If you have any problems downloading this version, try this URL to find a newer package https://www.terraform.io/downloads.html
+
+### Pull down the Data-Pipeline-Challenge
 
 ```
 git clone https://github.com/ckdecember/Data-Pipeline-Challenge
@@ -83,7 +92,7 @@ aws configure
 For the access/secret keys refer to the ACCESS_KEY and SECRET_ACCESS_KEY in the credentials file from the Amazon Web Services section.
 For region, use your current Amazon region and 'json' for the output format.
 
-+ Run Terraform
++ Preparations for Terraform
 ```
 cd Data-Pipeline-Challenge/terraform/
 cp variables.tf.master variables.tf
@@ -134,11 +143,9 @@ update_lambda.sh
 + Make a Kaggle account
 + Download loan.csv.zip
 + unzip loan.csv.zip
-+ Upload to S3
++ Upload to loan.csv to S3 bucket
 
-## Run Script
-- Check table / create table
-- Load from S3 to RDS directly
+@@@
 
 ## Future Data
 + load data to a temporary table

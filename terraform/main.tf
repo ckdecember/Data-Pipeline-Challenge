@@ -169,7 +169,6 @@ resource "aws_iam_policy" "policy_for_rds"  {
 EOF
 }
 
-// attach
 resource "aws_iam_role_policy_attachment" "rds-s3-attach" {
   role       = "${aws_iam_role.iam_for_rds.name}"
   policy_arn = "${aws_iam_policy.policy_for_rds.arn}"
@@ -197,6 +196,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = "${aws_s3_bucket.bucket_1.id}"
 
   lambda_function {
+    id = "Trigger On Upload"
     lambda_function_arn = "${aws_lambda_function.LoadTest2.arn}"
     events              = ["s3:ObjectCreated:*"]
   }
