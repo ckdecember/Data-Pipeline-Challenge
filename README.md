@@ -64,18 +64,23 @@ For region, use your current Amazon region and 'json' for the output format.
 + Create additional AWS roles and policies
 ```
 cd ~/Data-Pipeline-Challenge/terraform/
+./aws-rds-s3-role-create.sh
+./aws-rds-s3-policy-create.sh
 ```
 
-Manually in awscli
-Create
-rds-s3-role
+Use the output of policy-create's "ARN" in the next script
+```
+./aws-rds-s3-role-attach.sh [POLICY-ARN]
+```
 
 Create
 KMS
 
+Create 
+S3 bucket
+
 + Run Terraform
 ```
-cd ~/Data-Pipeline-Challenge/terraform/
 cp variables.tf.master variables.tf
 ```
 
@@ -86,9 +91,7 @@ Fill in the values of variables.tf to match what you desire in your new infrastr
 + DBUser is the DB master username 
 + DBPassword is the DB master password
 + dev-keyname is the IAM key name in AWS
-+ rds-s3-role is a role to be assigned to RDS with access to S3 buckets
-+ s3_bucket_name is the name of the bucket to store the loans
-+ rdss3integrationrole
+
 
 ```
 terraform init

@@ -18,11 +18,6 @@ variable "MyIP" {
     default = ""
 }
 
-variable "MyIP2" {
-    description = "My IP"
-    default = ""
-}
-
 variable "DBUser" {
     description = "PG User"
     default = ""
@@ -47,7 +42,6 @@ variable "s3_bucket_name" {
     description = "s3 bucket name"
     default = ""
 }
-
 
 variable "rdss3integrationrole" {
     description = "rds role"

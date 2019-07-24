@@ -55,6 +55,10 @@ resource "aws_instance" "i-1" {
     }
 }
 
+output "i-1_ip" {
+  value = "${aws_instance.i-1.public_ip}"
+}
+
 resource "aws_db_instance" "postgresq" {
   allocated_storage    = 20
   storage_type         = "gp2"
@@ -76,10 +80,6 @@ output "rds_endpoint" {
   value = "${aws_db_instance.postgresq.endpoint}"
 }
 
-output "rds_db_identifier" {
-  value = "${aws_db_instance.postgresq.id}"
-}
-
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "main"
   subnet_ids = ["${aws_subnet.subnet-1.id}", "${aws_subnet.subnet-1-b.id}"]
@@ -98,7 +98,7 @@ resource "aws_security_group" "allow_ssh" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${var.MyIP}", "${var.MyIP2}"] 
+    cidr_blocks = ["${var.MyIP}"] 
   }
 
   egress {
