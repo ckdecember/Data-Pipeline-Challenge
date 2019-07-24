@@ -137,7 +137,7 @@ resource "aws_iam_role" "iam_for_rds" {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "Service": "lambda.amazonaws.com"
+        "Service": "rds.amazonaws.com"
       },
       "Effect": "Allow",
       "Sid": ""
@@ -205,5 +205,5 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 resource "aws_db_instance_role_association" "db-role-assoc" {
   db_instance_identifier = "${aws_db_instance.postgresq.id}"
   feature_name           = "s3Import"
-  role_arn               = "${aws_iam_role.iam_for_rds.id}"
+  role_arn               = "${aws_iam_role.iam_for_rds.arn}"
 }
