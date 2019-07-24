@@ -127,6 +127,62 @@ resource "aws_iam_role" "iam_for_lambda" {
 EOF
 }
 
+resource "aws_iam_role" "iam_for_rds" {
+  name = "iam_for_rds"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "policy_for_rds"  {
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "s3integration",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::*"
+            ]
+        }
+    ]
+}
+EOF
+}
+
+// attach
+resource "aws_iam_role_policy_attachment" "rds-s3-attach" {
+  role       = "${aws_iam_role.iam_for_rds.name}"
+  policy_arn = "${aws_iam_policy.policy_for_rds.arn}"
+}
+
+resource "aws_lambda_permission" "allow_bucket" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.LoadTest2.arn}"
+  principal     = "s3.amazonaws.com"
+  source_arn    = "${aws_s3_bucket.bucket_1.arn}"
+}
+
 resource "aws_lambda_function" "LoadTest2" {
   filename      = "../src/load.zip"
   function_name = "LoadTest2"
@@ -135,4 +191,19 @@ resource "aws_lambda_function" "LoadTest2" {
 
   runtime = "python3.6"
   timeout = 600
+}
+
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket = "${aws_s3_bucket.bucket_1.id}"
+
+  lambda_function {
+    lambda_function_arn = "${aws_lambda_function.LoadTest2.arn}"
+    events              = ["s3:ObjectCreated:*"]
+  }
+}
+
+resource "aws_db_instance_role_association" "db-role-assoc" {
+  db_instance_identifier = "${aws_db_instance.postgresq.id}"
+  feature_name           = "s3Import"
+  role_arn               = "${aws_iam_role.iam_for_rds.id}"
 }

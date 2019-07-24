@@ -94,6 +94,7 @@ Fill in the values of variables.tf to match what you desire in your new infrastr
 + VPC has to be a superset of Subnet 1 and Subnet 2.  Both are needed for RDS. e.g.  10.0.0.0/16 VPC, 10.0.0.0/24 Sub1, 10.0.1.0/24 Sub2
 + DBUser is the DB master username 
 + DBPassword is the DB master password
++ DBName is the name of the database
 
 ```
 cd ~/Data-Pipeline-Challenge/src
@@ -106,10 +107,7 @@ sudo pip3 install python-dotenv -t ./
 ./create_lambda_zip.sh
 ```
 
-## Create initial lambda package
-=======
-+ DBName is the name of the database
-
+# Terraform
 ```
 terraform init
 terraform plan
@@ -120,11 +118,10 @@ Get some coffee.  This might take some time.
 
 ## Application
 
-+ Deploy the Lambda Function
++ Deploy the Lambda Function with proper configuration
 
 ```
 cd ~/Data-Pipeline-Challenge/src
-cp env.master .env
 [edit .env]
 git clone https://github.com/jkehler/awslambda-psycopg2
 pip3 install python-dotenv -t ./
