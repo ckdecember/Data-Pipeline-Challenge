@@ -76,6 +76,10 @@ output "rds_endpoint" {
   value = "${aws_db_instance.postgresq.endpoint}"
 }
 
+output "rds_db_identifier" {
+  value = "${aws_db_instance.postgresq.id}"
+}
+
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "main"
   subnet_ids = ["${aws_subnet.subnet-1.id}", "${aws_subnet.subnet-1-b.id}"]
@@ -150,6 +154,10 @@ resource "aws_security_group" "allow_all" {
   }
 }
 
+// maybe drop the key here.  make aws s3 bucket on it's own with command line
+// also make the s3import via aws command line
+
+/*
 resource "aws_s3_bucket" "bucket_1" {
   bucket = "${var.s3_bucket_name}"
 
@@ -170,13 +178,26 @@ resource "aws_db_instance_role_association" "s3import" {
   feature_name           = "s3Import"
   role_arn               = "${var.rdss3integrationrole}"
 }
+*/
 
+/*
 resource "aws_iam_policy" "rds-to-s3-policy" {
   policy = "${file("rds-to-s3-policy.json")}"
 }
 
-resource "aws_iam_policy" "kms_s3_guard" {
+resource "aws_iam_role" "rds-s3-role" {
+  name = "rds-s3-integration-role"
+  assume_role_policy = "${file("rds-s3-integration-role.json")}"
+  tags = {
+    tag-key = "tag-value"
+  }
+}
+*/
+
+/*
+resource "aws_iam_policy" "kms-s3-guard" {
   policy = "${file("kms-s3-guard.json")}"
 }
+*/
 
 // need to tie these policies to roles

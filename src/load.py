@@ -42,6 +42,7 @@ class S3Loader:
         return
     
     def drop_table(self, table_name):
+        """ drop table """
         cursor = self.conn.cursor()
         sql_query = "DROP TABLE {}".format(table_name)
         cursor.execute(sql_query)
@@ -72,6 +73,7 @@ class S3Loader:
         return cursor.fetchone()[0]        
 
     def create_s3_extensions(self):
+        """ to read from s3 to pgsql directly, we need these extensions """
         self.read_sql_from_file('aws_pg_extension.sql')
         return
 
