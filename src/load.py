@@ -71,15 +71,17 @@ class S3Loader:
     def drop_table(self, table_name):
         """ drop table """
         cursor = self.conn.cursor()
-        sql_query = "DROP TABLE {}".format(table_name)
-        cursor.execute(sql_query)
+        cursor.execute("DROP TABLE %s", (table_name))
+        #sql_query = "DROP TABLE {}".format(table_name)
+        #cursor.execute(sql_query)
         self.conn.commit()
         return
     
     def remove_from_loan_tables(self, table_name):
         """ remove table from the metatable that lists existing loan tables """
         cursor = self.conn.cursor()
-        sqlquery = "DELETE FROM "
+        cursor.execute("DELETE FROM %s WHERE table_name = %s", (self.restricted_table, table_name))
+        self.conn.commit()
         return
     
     def create_extension(self):
@@ -93,16 +95,18 @@ class S3Loader:
     def check_if_table_exists(self, table_name):
         """ checks if table exists by looking at the postgresql metadata tables """
         cursor = self.conn.cursor()
-        checkQuery = "SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_name='{}')".format(table_name)
-        cursor.execute(checkQuery)
+        cursor.execute("SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_name=%s)", (table_name,)), 
+        #checkQuery = "SELECT EXISTS(SELECT * FROM information_schema.tables WHERE table_name='{}')".format(table_name)
+        #cursor.execute(checkQuery)
         self.conn.commit()
         return cursor.fetchone()[0]
 
     def check_if_extension_exists(self, extension):
         """ checks if db extension exists by looking at the postgresql metadata tables """
         cursor = self.conn.cursor()
-        checkQuery = "SELECT EXISTS(SELECT * FROM pg_extension WHERE extname = '{}')".format(extension)
-        cursor.execute(checkQuery)
+        cursor.execute("SELECT EXISTS(SELECT * FROM pg_extension WHERE extname = %s)", (extension,))
+        #checkQuery = "SELECT EXISTS(SELECT * FROM pg_extension WHERE extname = '{}')".format(extension)
+        #cursor.execute(checkQuery)
         self.conn.commit()
         return cursor.fetchone()[0]        
 
@@ -117,16 +121,22 @@ class S3Loader:
 
         table_name = file_name.split(".")[0]
 
-        sqlquery = """
-            SELECT aws_s3.table_import_from_s3(
-            '{}', '', '(format csv)',
-            '{}', '{}', '{}'
+        #sqlquery = """
+        #    SELECT aws_s3.table_import_from_s3(
+        #    '{}', '', '(format csv)',
+        #    '{}', '{}', '{}'
+        #    );
+        #""".format(table_name, bucket_name, file_name, region)
+
+        cursor.execute("""SELECT aws_s3.table_import_from_s3(\
+            %s, '', '(format csv)', 
+            %s, %s, %s
             );
-        """.format(table_name, bucket_name, file_name, region)
+        """, (table_name, bucket_name, file_name, region))
         
         print ("Loading data ...")
-        logger.debug(sqlquery)
-        cursor.execute(sqlquery)
+        #logger.debug(sqlquery)
+        #cursor.execute(sqlquery)
         self.conn.commit()
         return
     
