@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS master_loan
 (
+      source_table                              text,
 	  id                                         text,
 	  member_id                                  text,
 	  loan_amnt                                  text,

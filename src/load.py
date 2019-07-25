@@ -149,13 +149,21 @@ class S3Loader:
     
     def insert_select(self, src_table, dst_table):
         # do an insert select into the master table
-        
+        # maybe add a field to determine src table
         cursor = self.conn.cursor()
-        cursor.execute(
-            "INSERT INTO master_loan \
-            SELECT * FROM loan"
-        )
-        pass
+        sqlquery = """INSERT INTO {} ( "source_table", """.format(dst_table)
+        with open('headers.csv') as fh:
+            headers = fh.readlines()
+        headers = ",".join(headers)
+        sqlquery += headers
+        sqlquery += " ) SELECT '{}', ".format(src_table)
+        sqlquery += headers 
+        sqlquery += " FROM {}".format(src_table)
+
+        logger.debug(sqlquery)
+        cursor.execute(sqlquery)
+        self.conn.commit()
+        return
 
 def main():
     print ("S3 Loader {}".format(__version__))
@@ -179,6 +187,7 @@ def lambda_handler(event, context):
     s.create_meta_loan_table()
     s.s3_load(bucket_name, file_name, region)
     s.insert_into_loan_tables(table_name)
+    s.insert_select(table_name, "master_loan")
     return
 
 if __name__ == "__main__":

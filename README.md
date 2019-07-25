@@ -18,7 +18,7 @@ Assume all work will be shared with engineers, data engineers, data scientists, 
 ## Solution
 We will be utilizing Amazon as our cloud provider and leverage their services.  For the "infrastructure as code" component, we will be using Terraform.  As for processing, we will use lambda functions alongside with S3 storage.  Users will upload the loan files to S3 and Lambda will process them immediately after they are successfully uploaded.
 
-For Part 2, we will rely on temporary tables that are bulk loaded and use a controller script to use insert select statements for speedy insertions.  Data will be kept as is as this is the first phase.
+For Part 2, we will rely on temporary tables that are bulk loaded using a special feature of Amazon RDS and S3.  After loading we wil use insert select statements to load the master table.  The source table field will be added to the updates so you know where the data came from.  Data will be kept as is as this is the first phase so no validation is done.
 
 ## Amazon Technologies Used
 + Amazon S3 - for storing the loan files  
@@ -145,17 +145,30 @@ update_lambda.sh
 + unzip loan.csv.zip
 + Upload to loan.csv to S3 bucket
 
-@@@
-
-## Future Data
-+ load data to a temporary table
-+ use insert 
-INSERT into TARGETTABLE ([fields]) SELECT [fields] FROM SRCTABLE
-+ trigger off of S3 uploads into a Lambda
-
+# Additional Features if I had more time
 ## GPG
 + have all members use GPG
 + use GPG to transfer AWS credentials and PGSQL credentials securely
+This solves the problem of not allowing credentials over the cloud.
 
 ## Automating Kaggle Download
 + with cookies and some credentials, can automate this download
+
+## Dealing with duplicates
+The master loan table has the source table field so you can identify the source tables to uniquely identify fields that were in the previous batch.
+
+## No data validation/cleaning
+I felt it was more important to get the data inside the system than to worry about data validation.  Secondary tables can be made with purification/cleaning while the orignal master tables can be used as a hard reference point.  I didn't feel it was the job of the data architect to dictate what the data science/engineers needed or wanted -- just to make the data available to them.
+
+## Perhaps better storage facility
+There might be a faster storage facility for long term warehousing but I decided to go with what I knew best.  Furthermore, Postgresql can still be used as a temporary storage facility to migrate to other data warehouses to fit the data scientist's needs.  My research seemed to indicate Postgresql is suitable for moderate amounts of analysis.
+
+## Additional Security
+Amazon KMS was used to guard the S3 buckets, but I ran into some issues.  The kaggle data is public anyway so I figured this was a reasonable trade off but I'd like to enable it again.  More fine grained controls on IAM policies and SecurityGroups would be nice, but I wanted to press for features over security.
+
+## Modules for Terraform
+I would have liked to do this a well but as Terraform tests can take a while, I opted not to do this.
+
+## Cost Analysis of Lambda vs EC2
+While Lambda triggering off of S3 events is particular convenient, it is possible the data loader component did not need to be a Lamba.  I'd like to have done a cost analysis to see if a hybrid approach or pure lambda made more economical sense.
+
