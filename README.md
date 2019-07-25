@@ -111,13 +111,14 @@ sudo apt-get -y install zip
 cp env.master .env
 [edit .env - just fill S3_REGION for now]
 git clone https://github.com/jkehler/awslambda-psycopg2
-cp awslambda-psycopg2/psycopg2-3.6 psycopg2
+cp -r awslambda-psycopg2/psycopg2-3.6 psycopg2
 sudo pip3 install python-dotenv -t ./
-./create_lambda_zip.sh
+./create_zip.sh
 ```
 
 # Terraform
 ```
+cd ~/Data-Pipeline-Challenge/terraform/
 terraform init
 terraform plan
 terraform apply
@@ -132,9 +133,6 @@ Get some coffee.  This might take some time.
 ```
 cd ~/Data-Pipeline-Challenge/src
 [edit .env]
-git clone https://github.com/jkehler/awslambda-psycopg2
-pip3 install python-dotenv -t ./
-
 update_lambda.sh
 
 ```
@@ -172,3 +170,5 @@ I would have liked to do this a well but as Terraform tests can take a while, I 
 ## Cost Analysis of Lambda vs EC2
 While Lambda triggering off of S3 events is particular convenient, it is possible the data loader component did not need to be a Lamba.  I'd like to have done a cost analysis to see if a hybrid approach or pure lambda made more economical sense.
 
+## Unit Tests
+I would have liked to put some unit tests, but the lambda function was fairly simple.
