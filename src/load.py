@@ -10,6 +10,7 @@ import sys
 
 from dotenv import load_dotenv
 import psycopg2
+import psycopg2.sql
 
 __version__ = "0.02"
 __author__ = "Carroll Kong"
@@ -57,36 +58,31 @@ class S3Loader:
 
     def create_master_table(self):
         """ make initial master table, or rename first table into master one? """
-        """table_exists = self.check_if_table_exists(os.environ['LOAN_TABLE'])
-
-        if table_exists:
-            print ("Table exists - deleting")
-            #sys.exit(1)
-            self.drop_table(os.environ['LOAN_TABLE'])
-            self.remove_from_loan_tables(os.environ['LOAN_TABLE'])
-
-        self.read_sql_from_file('createtable.sql')
-        return"""
+        self.read_sql_from_file('createmastertable.sql')
         return
 
     def drop_table(self, table_name):
         """ drop table """
         cursor = self.conn.cursor()
-        cursor.execute("DROP TABLE '%s'", (table_name,) )
+        cursor.execute(
+            psycopg2.sql.SQL("DROP TABLE {}").format(psycopg2.sql.Identifier(table_name)))
         self.conn.commit()
         return
 
     def insert_into_loan_tables(self, table_name):
         """ insert into metatable to keep track of loan tables """
         cursor = self.conn.cursor()
-        cursor.execute("""INSERT INTO %s ("table_name", "start_date") VALUES (%s, %s)""", (self.restricted_table, table_name, datetime.datetime.now()))
+        cursor.execute(
+            psycopg2.sql.SQL("""INSERT INTO {} ("table_name", "start_date") VALUES (%s, %s)""")
+                .format(psycopg2.sql.Identifier(self.restricted_table)), [table_name, datetime.datetime.now()])
         self.conn.commit()
         return
     
     def remove_from_loan_tables(self, table_name):
         """ remove table from the metatable that lists existing loan tables """
         cursor = self.conn.cursor()
-        cursor.execute("DELETE FROM %s WHERE table_name = %s", (self.restricted_table, table_name))
+        cursor.execute(
+            psycopg2.sql.SQL("DELETE FROM {} WHERE table_name = %s").format(psycopg2.sql.Identifier(self.restricted_table)), [table_name])
         self.conn.commit()
         return
     
@@ -152,19 +148,17 @@ class S3Loader:
         return
     
     def insert_select(self, src_table, dst_table):
-        """ skeleton for insert into select """
-        """ INSERT into DSTTABLE ([fields])
-        SELECT [fields] FROM SRCTABLE
-        """
+        # do an insert select into the master table
+        
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "INSERT INTO master_loan \
+            SELECT * FROM loan"
+        )
         pass
 
 def main():
     print ("S3 Loader {}".format(__version__))
-    s = S3Loader()
-    s.create_table()
-    s.create_extension()
-    s.create_meta_loan_table()
-    s.s3_load()
     return
 
 def lambda_handler(event, context):
@@ -179,6 +173,7 @@ def lambda_handler(event, context):
     table_name = file_name.split('.')[0]
 
     s = S3Loader()
+    s.create_master_table()
     s.create_table()
     s.create_extension()
     s.create_meta_loan_table()
